@@ -10,15 +10,18 @@ def getSecret(coefs):
 def findInverse(x):
     return pow(x, -1, FIELD_MOD)
 
-def getReconstructionVector(shares):
+def getReconstructionVector(shares, threshold):
     result = dict()
 
+    # Take only threhold number of shares since this is all we need
+    tShares = shares[0:threshold]
+
     # For each share's x-value create a reconstruction value
-    for share in shares:
+    for share in tShares:
         # Create the product of all except the share
         numerator = 1
         denominator = 1
-        for x in shares:
+        for x in tShares:
             if (x[0] != share[0]):
                 numerator *= (-x[0])
                 denominator *= (share[0] - x[0])
@@ -34,21 +37,25 @@ def getReconstructionVector(shares):
     return result
 
 
-def reconstructSecret(shares):
+def reconstructSecret(shares, threshold = -1):
+    # If no threshold is given just try to use all shares
+    # Using more shares than the threshold value does
+    # not corrupt the result, but worsens performance.
+    if (threshold == -1):
+        threshold = len(shares)
+
     # Create the reconstruction vector
-    reconstructionValuesMap = getReconstructionVector(shares)
+    reconstructionValuesMap = getReconstructionVector(shares, threshold)
 
     secret = 0
     # Multiply the reconstruction values with
     # the corresponding share values.
-    # Using more shares than the threshold value does
-    # not corrupt the result, but worsens performance.
-    for share in shares:
-        secret += share[1] * reconstructionValuesMap[share[0]]
+    for i in range(0, threshold):
+        secret += shares[i][1] * reconstructionValuesMap[shares[i][0]]
 
     return secret % FIELD_MOD
 
-# IS WAAAAY TOO SLOW
+# IS WAAAAY TOO SLOW - Use horner
 def polyEval(x, coefs):
 
     y = coefs[0] # Add the constant term
@@ -76,6 +83,12 @@ def createShares(secret, n, threshold):
         print("Error: The number of shares, n, is smaller than the threshold.")
         raise Exception
 
+    # The threshold must be larger than 1 for SSH
+    # to work.
+    if (1 >= threshold):
+        print("Error: The threshold must be larger than 1.")
+        raise Exception
+
     # The secret can not be larger than the size of the field.
     if (secret >= FIELD_MOD):
         print("Error: The secret can not be larger than the size of the field.")
@@ -100,8 +113,8 @@ def getRandomPoly(treshold, secret):
     return coefs
 
 if __name__ == '__main__':
-    print("Creating 2 shares for secret '1337' with threshold value 2...")
-    shares = createShares(1337, 2000, 2000)
-    print("Shares: " + str(shares))
+    print("Creating shares for secret '1337' with threshold value ...")
+    shares = createShares(1337, 200000, 2000)
+    #print("Shares: " + str(shares))
     print("Reconstructing secret from shares...")
-    print("Reconstructed secret: " + str(reconstructSecret(shares)))
+    print("Reconstructed secret: " + str(reconstructSecret(shares, 2000)))
