@@ -4,9 +4,6 @@ import numpy as np
 # Mersenne prime
 FIELD_MOD = (2 ** 61) - 1
 
-def getSecret(coefs):
-    return polyEval(0, coefs)
-
 def findInverse(x):
     return pow(x, -1, FIELD_MOD)
 
@@ -38,9 +35,9 @@ def getReconstructionVector(shares, threshold):
 
 
 def reconstructSecret(shares, threshold = -1):
-    # If no threshold is given just try to use all shares
+    # If no threshold is given we just try to use all shares
     # Using more shares than the threshold value does
-    # not corrupt the result, but worsens performance.
+    # not make the result incorrect, but worsens performance.
     if (threshold == -1):
         threshold = len(shares)
 
@@ -54,17 +51,6 @@ def reconstructSecret(shares, threshold = -1):
         secret += shares[i][1] * reconstructionValuesMap[shares[i][0]]
 
     return secret % FIELD_MOD
-
-# IS WAAAAY TOO SLOW - Use horner
-def polyEval(x, coefs):
-
-    y = coefs[0] # Add the constant term
-    coefs.reverse()
-    for c in range(1, len(coefs)):
-        y += coefs[c] * (x ** c)
-    # This is crap, use horner's.
-    coefs.reverse()
-    return y % FIELD_MOD
 
 ''' Hornser's method for poly eval '''
 def horner(x, coefs):
@@ -89,9 +75,9 @@ def createShares(secret, n, threshold):
         print("Error: The threshold must be larger than 1.")
         raise Exception
 
-    # The secret can not be larger than the size of the field.
-    if (secret >= FIELD_MOD):
-        print("Error: The secret can not be larger than the size of the field.")
+    # The secret must be a value in the field
+    if (secret < 0 or secret >= FIELD_MOD):
+        print("Error: The secret must be a value in the field.")
         raise Exception
 
     # Get a random polynomial of degree treshold - 1
@@ -109,12 +95,9 @@ def createShares(secret, n, threshold):
 def getRandomPoly(treshold, secret):
     coefs = random.SystemRandom().sample(range(0, FIELD_MOD), treshold - 1)
     coefs.append(secret)
-    print("Polynomial coefficients: " + str(coefs))
     return coefs
 
 if __name__ == '__main__':
-    print("Creating shares for secret '1337' with threshold value ...")
-    shares = createShares(1337, 200000, 2000)
+    shares = createShares(1337, 200, 60)
     #print("Shares: " + str(shares))
-    print("Reconstructing secret from shares...")
-    print("Reconstructed secret: " + str(reconstructSecret(shares, 2000)))
+    print("Reconstructed secret: " + str(reconstructSecret(shares, 60)))
