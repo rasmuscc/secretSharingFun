@@ -1,5 +1,4 @@
 import random
-import numpy as np
 
 # Mersenne prime
 FIELD_MOD = (2 ** 61) - 1
@@ -7,15 +6,14 @@ FIELD_MOD = (2 ** 61) - 1
 def findInverse(x):
     return pow(x, -1, FIELD_MOD)
 
-def getReconstructionVector(shares, threshold):
+def getReconstructionValues(shares, threshold):
     result = dict()
 
-    # Take only threhold number of shares since this is all we need
+    # Use only threshold number of shares since this is all we need
     tShares = shares[0:threshold]
 
-    # For each share's x-value create a reconstruction value
+    # For each shares create a reconstruction value
     for share in tShares:
-        # Create the product of all except the share
         numerator = 1
         denominator = 1
         for x in tShares:
@@ -42,7 +40,7 @@ def reconstructSecret(shares, threshold = -1):
         threshold = len(shares)
 
     # Create the reconstruction vector
-    reconstructionValuesMap = getReconstructionVector(shares, threshold)
+    reconstructionValuesMap = getReconstructionValues(shares, threshold)
 
     secret = 0
     # Multiply the reconstruction values with
@@ -69,8 +67,7 @@ def createShares(secret, n, threshold):
         print("Error: The number of shares, n, is smaller than the threshold.")
         raise Exception
 
-    # The threshold must be larger than 1 for SSH
-    # to work.
+    # The threshold must be larger than 1 for SSH to work
     if (1 >= threshold):
         print("Error: The threshold must be larger than 1.")
         raise Exception
@@ -98,6 +95,5 @@ def getRandomPoly(treshold, secret):
     return coefs
 
 if __name__ == '__main__':
-    shares = createShares(1337, 200, 60)
-    #print("Shares: " + str(shares))
-    print("Reconstructed secret: " + str(reconstructSecret(shares, 60)))
+    shares = createShares(secret=1337, n=20, threshold=8)
+    print("Reconstructed secret: " + str(reconstructSecret(shares, threshold=8)))
