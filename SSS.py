@@ -1,10 +1,14 @@
 import random
+import cProfile
 
 # Mersenne prime
 FIELD_MOD = (2 ** 61) - 1
 
 def findInverse(x):
     return pow(x, -1, FIELD_MOD)
+
+def fastMod(x):
+    return (x & FIELD_MOD) + (x >> 61)
 
 def getReconstructionValues(shares, threshold):
     result = dict()
@@ -16,6 +20,8 @@ def getReconstructionValues(shares, threshold):
     for share in tShares:
         numerator = 1
         denominator = 1
+        # Todo: Optimize by using sum/product identities
+        # Todo: can numerator be written as n!/share?
         for x in tShares:
             if (x[0] != share[0]):
                 numerator *= (-x[0])
@@ -97,3 +103,4 @@ def getRandomPoly(treshold, secret):
 if __name__ == '__main__':
     shares = createShares(secret=1337, n=20, threshold=8)
     print("Reconstructed secret: " + str(reconstructSecret(shares, threshold=8)))
+
