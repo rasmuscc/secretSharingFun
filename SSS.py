@@ -1,14 +1,18 @@
 import random
 import cProfile
 
-# Mersenne prime
+# Mersenne prime (Required for fast mod)
 FIELD_MOD = (2 ** 61) - 1
+
 
 def findInverse(x):
     return pow(x, -1, FIELD_MOD)
 
+
 def fastMod(x):
+    # Bit magic exploiting the use of Mersenne Primes
     return (x & FIELD_MOD) + (x >> 61)
+
 
 def getReconstructionValues(shares, threshold):
     result = dict()
@@ -20,8 +24,8 @@ def getReconstructionValues(shares, threshold):
     for share in tShares:
         numerator = 1
         denominator = 1
-        # Todo: Optimize by using sum/product identities
-        # Todo: can numerator be written as n!/share?
+        # Todo: Optimize by using sum/product identities?
+        # Todo: can numerator be written as n!/share or something similiar?
         for x in tShares:
             if (x[0] != share[0]):
                 numerator *= (-x[0])
@@ -56,6 +60,7 @@ def reconstructSecret(shares, threshold = -1):
 
     return secret % FIELD_MOD
 
+
 ''' Hornser's method for poly eval '''
 def horner(x, coefs):
     n = len(coefs)
@@ -65,6 +70,7 @@ def horner(x, coefs):
         result = result * x + coefs[i]
 
     return result % FIELD_MOD
+
 
 def createShares(secret, n, threshold):
     # If the number of shares is less than t then
@@ -95,12 +101,15 @@ def createShares(secret, n, threshold):
 
     return shares
 
+
 def getRandomPoly(treshold, secret):
     coefs = random.SystemRandom().sample(range(0, FIELD_MOD), treshold - 1)
     coefs.append(secret)
     return coefs
 
+
 if __name__ == '__main__':
     shares = createShares(secret=1337, n=20, threshold=8)
+    print(shares)
     print("Reconstructed secret: " + str(reconstructSecret(shares, threshold=8)))
 
