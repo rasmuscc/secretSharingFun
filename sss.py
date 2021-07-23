@@ -1,14 +1,13 @@
 import random
 import cProfile
 
-
 class SSS:
 
     def __init__(self, FIELD_MOD = (2 ** 61) - 1):
         # Mersenne prime (Required for fast mod)
         self.FIELD_MOD = FIELD_MOD
 
-
+    @staticmethod
     def findInverse(self, x):
         return pow(x, -1, self.FIELD_MOD)
 
@@ -37,7 +36,7 @@ class SSS:
 
             # Find the inverse of the denominator to do
             # division (since we work in a field)
-            inverse = self.findInverse(denominator)
+            inverse = self.findInverse(self, denominator)
 
             # Multiply the inverse with the numerator
             # to get the reconstruction value.
