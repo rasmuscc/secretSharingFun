@@ -2,21 +2,37 @@ import random
 import cProfile
 
 class SSS:
-
+    '''
+        The constructor takes a prime as input
+        which is used to define the field that the
+        Shamir Secret Sharing is to use.
+    '''
     def __init__(self, FIELD_MOD = (2 ** 61) - 1):
         # Mersenne prime (Required for fast mod)
         self.FIELD_MOD = FIELD_MOD
 
+    '''
+        Returns the field inverse of x.
+        This method requires python 3.8 or higher.
+    '''
     @staticmethod
     def findInverse(self, x):
         return pow(x, -1, self.FIELD_MOD)
 
-
+    '''
+        Returns x mod FIELD_MOD.
+        This only works if FIELD_MOD is a Mersenne prime.
+    '''
     def fastMod(self, x):
-        # Bit magic exploiting the use of Mersenne Primes
+        # Bit magic exploiting the use of Mersenne primes
         return (x & self.FIELD_MOD) + (x >> 61)
 
-
+    '''
+        Returns the reconstruction values. I.e. for each
+        share (x_i, y_i) we create a function r_i which is 1 
+        when x=x_i and 0 otherwise. The reconstruction values
+         are then r_0(0),r_1(0)...r_threshold(0)
+    '''
     def getReconstructionValues(self, shares, threshold):
         result = dict()
 
@@ -44,7 +60,11 @@ class SSS:
 
         return result
 
-
+    '''
+        Reconstructs the secret given enough shares.
+        If no threshold value is given then lagrange interpolation
+        is done using all the shares.
+    '''
     def reconstructSecret(self, shares, threshold = -1):
         # If no threshold is given we just try to use all shares
         # Using more shares than the threshold value does
@@ -64,7 +84,11 @@ class SSS:
         return secret % self.FIELD_MOD
 
 
-    ''' Hornser's method for poly eval '''
+    '''
+        Horner's method for fast polynomial evaluation.
+        Returns the function value at x for the polynomial
+        defined by the coefs parameter.
+    '''
     def horner(self, x, coefs):
         n = len(coefs)
         result = coefs[0]
@@ -74,15 +98,18 @@ class SSS:
 
         return result % self.FIELD_MOD
 
-
-    def createShares(self, secret, n, threshold):
+    '''
+        Validates that the input given to createShares.
+        Raises and Exception if the input is invalid.
+    '''
+    def validateInput(self, secret, n, threshold):
         # If the number of shares is less than t then
         # we can not reconstruct the poly.
         if (n < threshold):
             print("Error: The number of shares, n, is smaller than the threshold.")
             raise Exception
 
-        # The threshold must be larger than 1 for SSH to work
+        # The threshold must be larger than 1 for SSS to work
         if (1 >= threshold):
             print("Error: The threshold must be larger than 1.")
             raise Exception
@@ -91,6 +118,13 @@ class SSS:
         if (secret < 0 or secret >= self.FIELD_MOD):
             print("Error: The secret must be a value in the field.")
             raise Exception
+
+    '''
+        Create n shamir secret shares for a given secret
+        and a given threshold.
+    '''
+    def createShares(self, secret, n, threshold):
+        self.validateInput(secret, n, threshold)
 
         # Get a random polynomial of degree treshold - 1
         coefs = self.getRandomPoly(threshold, secret)
@@ -104,7 +138,12 @@ class SSS:
 
         return shares
 
-
+    '''
+        Returns a random polynomial over a field.
+        The polynomial is represented as a list of coefficients.
+        The coefficients are ordered such that the highest
+        degree term's coefficient is first in the list and so on...
+    '''
     def getRandomPoly(self, treshold, secret):
         coefs = random.SystemRandom().sample(range(0, self.FIELD_MOD), treshold - 1)
         coefs.append(secret)
