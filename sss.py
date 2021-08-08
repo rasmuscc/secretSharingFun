@@ -2,6 +2,7 @@ import random
 import cProfile
 
 class SSS:
+
     '''
         The constructor takes a prime as input
         which is used to define the field that the
@@ -11,6 +12,7 @@ class SSS:
         # Mersenne prime (Required for fast mod)
         self.FIELD_MOD = FIELD_MOD
 
+
     '''
         Returns the field inverse of x.
         This method requires python 3.8 or higher.
@@ -18,6 +20,7 @@ class SSS:
     @staticmethod
     def findInverse(self, x):
         return pow(x, -1, self.FIELD_MOD)
+
 
     '''
         Returns x mod FIELD_MOD.
@@ -27,11 +30,12 @@ class SSS:
         # Bit magic exploiting the use of Mersenne primes
         return (x & self.FIELD_MOD) + (x >> 61)
 
+
     '''
-        Returns the reconstruction values. I.e. for each
-        share (x_i, y_i) we create a function r_i which is 1 
-        when x=x_i and 0 otherwise. The reconstruction values
-         are then r_0(0),r_1(0)...r_threshold(0)
+        Returns a map from each shares x-coordinate to its
+        reconstruction value. I.e. for each share (x_i, y_i)
+        we create a function r_i which is 1 when x=x_i and 0 otherwise.
+        The reconstruction values are then r_0(0),r_1(0)...r_threshold(0)
     '''
     def getReconstructionValues(self, shares, threshold):
         result = dict()
@@ -59,6 +63,7 @@ class SSS:
             result[share[0]] = (numerator * inverse) % self.FIELD_MOD
 
         return result
+
 
     '''
         Reconstructs the secret given enough shares.
@@ -98,6 +103,7 @@ class SSS:
 
         return result % self.FIELD_MOD
 
+
     '''
         Validates that the input given to createShares.
         Raises and Exception if the input is invalid.
@@ -119,6 +125,7 @@ class SSS:
             print("Error: The secret must be a value in the field.")
             raise Exception
 
+
     '''
         Create n shamir secret shares for a given secret
         and a given threshold.
@@ -137,6 +144,7 @@ class SSS:
             shares.append((x, self.horner(x, coefs)))
 
         return shares
+
 
     '''
         Returns a random polynomial over a field.
