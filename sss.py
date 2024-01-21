@@ -15,10 +15,9 @@ class SSS:
 
     '''
         Returns the field inverse of x.
-        This method requires python 3.8 or higher.
     '''
     @staticmethod
-    def findInverse(self, x):
+    def find_inverse(self, x):
         return pow(x, -1, self.FIELD_MOD)
 
 
@@ -26,7 +25,7 @@ class SSS:
         Returns x mod FIELD_MOD.
         This only works if FIELD_MOD is a Mersenne prime.
     '''
-    def fastMod(self, x):
+    def fast_mod(self, x):
         # Bit magic exploiting the use of Mersenne primes
         return (x & self.FIELD_MOD) + (x >> 61)
 
@@ -37,7 +36,7 @@ class SSS:
         we create a function r_i which is 1 when x=x_i and 0 otherwise.
         The reconstruction values are then r_0(0),r_1(0)...r_threshold(0)
     '''
-    def getReconstructionValues(self, shares, threshold):
+    def get_reconstruction_values(self, shares, threshold):
         result = dict()
 
         # Use only threshold number of shares since this is all we need
@@ -56,7 +55,7 @@ class SSS:
 
             # Find the inverse of the denominator to do
             # division (since we work in a field)
-            inverse = self.findInverse(self, denominator)
+            inverse = self.find_inverse(self, denominator)
 
             # Multiply the inverse with the numerator
             # to get the reconstruction value.
@@ -70,7 +69,7 @@ class SSS:
         If no threshold value is given then lagrange interpolation
         is done using all the shares.
     '''
-    def reconstructSecret(self, shares, threshold = -1):
+    def reconstruct_secret(self, shares, threshold = -1):
         # If no threshold is given we just try to use all shares
         # Using more shares than the threshold value does
         # not make the result incorrect, but worsens performance.
@@ -78,7 +77,7 @@ class SSS:
             threshold = len(shares)
 
         # Create the reconstruction vector
-        reconstructionValuesMap = self.getReconstructionValues(shares, threshold)
+        reconstructionValuesMap = self.get_reconstruction_values(shares, threshold)
 
         secret = 0
         # Multiply the reconstruction values with
@@ -94,7 +93,7 @@ class SSS:
         Returns the function value at x for the polynomial
         defined by the coefs parameter.
     '''
-    def horner(self, x, coefs):
+    def horner_eval(self, x, coefs):
         n = len(coefs)
         result = coefs[0]
 
@@ -108,7 +107,7 @@ class SSS:
         Validates that the input given to createShares.
         Raises and Exception if the input is invalid.
     '''
-    def validateInput(self, secret, n, threshold):
+    def validate_input(self, secret, n, threshold):
         # If the number of shares is less than t then
         # we can not reconstruct the poly.
         if (n < threshold):
@@ -130,8 +129,8 @@ class SSS:
         Create n shamir secret shares for a given secret
         and a given threshold.
     '''
-    def createShares(self, secret, n, threshold):
-        self.validateInput(secret, n, threshold)
+    def create_shares(self, secret, n, threshold):
+        self.validate_input(secret, n, threshold)
 
         # Get a random polynomial of degree treshold - 1
         coefs = self.getRandomPoly(threshold, secret)
@@ -141,7 +140,7 @@ class SSS:
         # (this is the secret)
         shares = list()
         for x in range(1, n + 1):
-            shares.append((x, self.horner(x, coefs)))
+            shares.append((x, self.horner_eval(x, coefs)))
 
         return shares
 
