@@ -1,4 +1,4 @@
-# Shamir Secret Sharing.
+# Shamir Secret Sharing
 https://en.wikipedia.org/wiki/Shamir%27s_Secret_Sharing
 
 **Do not use in production! This is an insecure POC!**
